@@ -34,6 +34,25 @@ A Reliable and Efficient Visuo-Tactile BiManual Manipulation Interface
 
 ---
 
+## 📑 Table of Contents
+
+- [🔧 Hardware Setup](#-hardware-setup)
+- [📦 Installation](#-installation)
+- [🎥 Data Collection](#-data-collection)
+  - [⚙️ Configuration](#️-configuration)
+  - [📹 Step 1: Start Data Recorder](#-step-1-start-data-recorder)
+  - [🔌 Step 2: Setup ADB Port Forwarding](#-step-2-setup-adb-port-forwarding)
+  - [🎯 Step 3: Start Pose Tracking](#-step-3-start-pose-tracking)
+  - [🔄 Step 4: Process Collected Data](#-step-4-process-collected-data)
+  - [📊 Zarr Data Structure](#-zarr-data-structure)
+- [🚀 Training Policy](#-training-policy)
+- [🤖 Real-World Deployment](#-real-world-deployment)
+- [🙏 Acknowledgement](#-acknowledgement)
+- [🔗 Citation](#-citation)
+- [📧 Contact](#-contact)
+
+---
+
 ## 🔧 Hardware Setup
 
 We provide multiple hardware configuration options for data collection:
@@ -252,3 +271,8 @@ If you find our work useful, please consider citing:
 ```
 --
 ```
+
+## 📧 Contact
+
+For questions or collaborations, please contact:
+- **Chuanyu Li**: [chuanyu.ne79@gmail.com](mailto:chuanyu.ne79@gmail.com)
