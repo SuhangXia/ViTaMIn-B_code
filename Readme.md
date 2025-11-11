@@ -26,7 +26,7 @@ A Reliable and Efficient Visuo-Tactile BiManual Manipulation Interface
 </p>
 
 <div align="center">
-<a href='https://chuanyune.github.io/ViTaMIn-B_page/'><img alt='arXiv' src='https://img.shields.io/badge/arXiv-2503.02881-red.svg'></a>     
+<a href='https://arxiv.org/abs/2511.05858'><img alt='arXiv' src='https://img.shields.io/badge/arXiv-2503.02881-red.svg'></a>     
 <a href='https://chuanyune.github.io/ViTaMIn-B_page/'><img alt='project website' src='https://img.shields.io/website-up-down-green-red/http/cv.lbesson.qc.to.svg'></a>     
 <a href='https://huggingface.co/datasets/chuanyune/ViTaMIn-B_data_and_ckpt/tree/main'><img alt='data' src='https://img.shields.io/badge/data-FFD21E?logo=huggingface&logoColor=000'></a>  
 <a href='https://huggingface.co/datasets/chuanyune/ViTaMIn-B_data_and_ckpt/tree/main'><img alt='checkpoints' src='https://img.shields.io/badge/checkpoints-FFD21E?logo=huggingface&logoColor=000'></a>    
