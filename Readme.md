@@ -77,8 +77,8 @@ Once you've assembled the data collection device, connect the cameras and foot p
 ### Clone Repository
 
 ```bash
-git clone git@github.com:chuanyune/ViTaMIn-B.git
-cd ViTaMIn-B
+git clone git@github.com:chuanyune/ViTaMIn-B_code.git
+cd ViTaMIn-B_code
 ```
 
 ### Setup Environment
