@@ -269,7 +269,12 @@ Thanks for their great work!
 If you find our work useful, please consider citing:
 
 ```
---
+@article{li2025vitamin,
+  title={ViTaMIn-B: A Reliable and Efficient Visuo-Tactile Bimanual Manipulation Interface},
+  author={Li, Chuanyu and Liu, Chaoyi and Wang, Daotan and Zhang, Shuyu and Li, Lusong and Zeng, Zecui and Liu, Fangchen and Xu, Jing and Chen, Rui},
+  journal={arXiv preprint arXiv:2511.05858},
+  year={2025}
+}
 ```
 
 ## 📧 Contact
