@@ -4,10 +4,17 @@ import json
 import argparse
 from pathlib import Path
 
-def calculate_latency(video_path: str, aruco_csv: str, video_csv: str, output_path: str):
-    TARGET_ID = 30
+def calculate_latency(
+    video_path: str,
+    aruco_csv: str,
+    video_csv: str,
+    output_path: str,
+    target_id: int = 10,
+):
+    TARGET_ID = target_id
     aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_100)
-    parameters = cv2.aruco.DetectorParameters()
+    param = cv2.aruco.DetectorParameters()
+    detector = cv2.aruco.ArucoDetector(aruco_dict, param)
 
     aruco_timestamps = {}
     with open(aruco_csv, mode='r') as f:
@@ -50,7 +57,7 @@ def calculate_latency(video_path: str, aruco_csv: str, video_csv: str, output_pa
             break
 
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        corners, ids, _ = cv2.aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
+        corners, ids, _ = detector.detectMarkers(gray)
         
         if ids is not None and TARGET_ID in ids.flatten():
             target_frame = frame_count
@@ -73,7 +80,10 @@ def calculate_latency(video_path: str, aruco_csv: str, video_csv: str, output_pa
             print(f"Processed {frame_count} frames...")
 
     cap.release()
-    cv2.destroyAllWindows()
+    try:
+        cv2.destroyAllWindows()
+    except Exception:
+        pass
 
     if target_frame is not None and aruco_time is not None and video_time is not None:
         latency = video_time - aruco_time
@@ -132,17 +142,69 @@ def calculate_latency(video_path: str, aruco_csv: str, video_csv: str, output_pa
     else:
         print(f"\nID {TARGET_ID} not found or missing timestamp data")
         print(f"Total frames processed: {frame_count}")
+        print("提示: 需在录制期间显示 ArUco（先按录制，再按 vis_aruco 的 Enter 开始序列）")
 
 
 if __name__ == "__main__":
-    video_path = "./data_cali/tactile_2025.09.01_13.43.27.931/tactile_recording.mp4"
-    aruco_csv = "./data_cali/aruco_2025.09.01_13.43.40.998/aruco_timestamps.csv"
-    video_csv = "./data_cali/tactile_2025.09.01_13.43.27.931/tactile_timestamps.csv"
-    output_json = "latency_result.json"
-    
-    print(f"Video file: {video_path}")
-    print(f"ArUco CSV: {aruco_csv}")
-    print(f"Video CSV: {video_csv}")
-    print(f"Output JSON: {output_json}")
-    
-    calculate_latency(video_path, aruco_csv, video_csv, output_json)
+    ap = argparse.ArgumentParser(
+        description="相机延迟标定：ArUco 在屏幕上按时间显示，相机录制屏幕，用两者时间差算延迟",
+        epilog="""示例（传目录更方便）:
+  python cali_cam_latency.py --visual_dir data_cali/visual_2026.01.30_16.07.28.336 \\
+    --aruco_dir data_cali/aruco_2026.01.30_16.11.51.473
+  python cali_cam_latency.py --latest   # 自动用 data_cali 下最新的 visual 和 aruco 目录
+"""
+    )
+    ap.add_argument("--latest", action="store_true", help="自动用 data_cali 下最新的 visual 和 aruco 目录")
+    ap.add_argument("--visual_dir", help="visual 录制目录，内含 visual_recording.mp4 和 visual_timestamps.csv")
+    ap.add_argument("--aruco_dir", help="aruco 目录，内含 aruco_timestamps.csv")
+    ap.add_argument("--video", "-v", help="相机录制的视频路径（与 --aruco_csv --video_csv 一起用）")
+    ap.add_argument("--aruco_csv", "-a", help="vis_aruco 的 aruco_timestamps.csv 路径")
+    ap.add_argument("--video_csv", "-c", help="录制的 timestamps CSV 路径")
+    ap.add_argument("--target_id", "-t", type=int, default=10, help="用于算延迟的 ArUco ID，默认 10")
+    ap.add_argument("--output", "-o", default=None, help="结果 JSON 路径；默认存在视频同目录")
+    ap.add_argument("--data_cali", default="data_cali", help="--latest 时查找的根目录")
+    args = ap.parse_args()
+
+    video_path = None
+    aruco_csv_path = None
+    video_csv_path = None
+
+    if args.latest:
+        base = Path(args.data_cali)
+        if not base.exists():
+            ap.error(f"--latest 时 {base} 不存在")
+        visual_dirs = sorted(base.glob("visual_*"), key=lambda p: p.stat().st_mtime, reverse=True)
+        aruco_dirs = sorted(base.glob("aruco_*"), key=lambda p: p.stat().st_mtime, reverse=True)
+        if not visual_dirs or not aruco_dirs:
+            ap.error(f"--latest 在 {base} 下未找到 visual_* 或 aruco_* 目录")
+        vd = visual_dirs[0]
+        ad = aruco_dirs[0]
+        mode = vd.name.split("_")[0]
+        video_path = str(vd / f"{mode}_recording.mp4")
+        video_csv_path = str(vd / f"{mode}_timestamps.csv")
+        aruco_csv_path = str(ad / "aruco_timestamps.csv")
+        print(f"[--latest] visual: {vd.name}")
+        print(f"[--latest] aruco:  {ad.name}")
+    elif args.visual_dir and args.aruco_dir:
+        vd = Path(args.visual_dir)
+        ad = Path(args.aruco_dir)
+        mode = vd.name.split("_")[0] if "_" in vd.name else "visual"
+        video_path = str(vd / f"{mode}_recording.mp4")
+        video_csv_path = str(vd / f"{mode}_timestamps.csv")
+        aruco_csv_path = str(ad / "aruco_timestamps.csv")
+    elif args.video and args.aruco_csv and args.video_csv:
+        video_path = args.video
+        aruco_csv_path = args.aruco_csv
+        video_csv_path = args.video_csv
+    else:
+        ap.error("请用 --latest、或 --visual_dir + --aruco_dir、或 --video + --aruco_csv + --video_csv")
+
+    out = args.output
+    if not out:
+        out = str(Path(video_path).parent / "latency_result.json")
+
+    print(f"Video: {video_path}")
+    print(f"ArUco CSV: {aruco_csv_path}")
+    print(f"Video CSV: {video_csv_path}")
+    print(f"Target ID: {args.target_id}")
+    calculate_latency(video_path, aruco_csv_path, video_csv_path, out, target_id=args.target_id)
